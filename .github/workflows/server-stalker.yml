@@ -2,6 +2,8 @@ name: JBF Server Stalker
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
 
 jobs:
   palworld-test:
