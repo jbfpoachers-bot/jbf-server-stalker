@@ -19,10 +19,10 @@ jobs:
       - name: Query JBF Ragnarok
         run: |
           node --input-type=module <<'EOF'
-          import Gamedig from 'gamedig';
+          import { GameDig } from 'gamedig';
 
           try {
-            const state = await Gamedig.query({
+            const state = await GameDig.query({
               type: 'asa',
               host: '85.190.136.183',
               port: 5470,
