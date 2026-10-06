@@ -4,42 +4,40 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-ark:
+  palworld-test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 22
 
       - name: Install GameDig
         run: npm install gamedig
 
-      - name: Query JBF Ragnarok
+      - name: Query JBF Palworld
         run: |
           node --input-type=module <<'EOF'
           import { GameDig } from 'gamedig';
 
           try {
             const state = await GameDig.query({
-              type: 'asa',
-              host: '85.190.136.183',
-              port: 5470,
-              givenPortOnly: true
+              type: 'palworld',
+              host: '85.190.159.217',
+              port: 17123,
+              maxAttempts: 2,
+              socketTimeout: 10000
             });
 
-            console.log('=================================');
-            console.log('JBF SERVER STALKER');
-            console.log('=================================');
+            console.log('SUCCESS!');
             console.log('Server:', state.name);
-            console.log('Map:', state.map);
             console.log('Players:', state.numplayers);
             console.log('Max Players:', state.maxplayers);
-            console.log('Ping:', state.ping, 'ms');
-            console.log('=================================');
+            console.log('Ping:', state.ping);
+            console.log('Map:', state.map);
           } catch (error) {
-            console.error('QUERY FAILED');
+            console.log('QUERY FAILED');
             console.error(error);
             process.exit(1);
           }
