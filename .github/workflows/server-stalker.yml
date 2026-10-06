@@ -1,0 +1,46 @@
+name: JBF Server Stalker
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install GameDig
+        run: npm install gamedig
+
+      - name: Query JBF Ragnarok
+        run: |
+          node --input-type=module <<'EOF'
+          import Gamedig from 'gamedig';
+
+          try {
+            const state = await Gamedig.query({
+              type: 'asa',
+              host: '85.190.136.183',
+              port: 5470,
+              givenPortOnly: true
+            });
+
+            console.log('=================================');
+            console.log('JBF SERVER STALKER');
+            console.log('=================================');
+            console.log('Server:', state.name);
+            console.log('Map:', state.map);
+            console.log('Players:', state.numplayers);
+            console.log('Max Players:', state.maxplayers);
+            console.log('Ping:', state.ping, 'ms');
+            console.log('=================================');
+          } catch (error) {
+            console.error('QUERY FAILED');
+            console.error(error);
+            process.exit(1);
+          }
+          EOF
