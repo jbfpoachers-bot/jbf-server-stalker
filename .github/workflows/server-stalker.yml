@@ -5,12 +5,18 @@ on:
   schedule:
     - cron: '*/15 * * * *'
 
+permissions:
+  contents: write
+
 jobs:
   palworld-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Query JBF Palworld REST API
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Query JBF Palworld and save player count
         env:
           PALWORLD_ADMIN_PASSWORD: ${{ secrets.PALWORLD_ADMIN_PASSWORD }}
         run: |
@@ -28,16 +34,34 @@ jobs:
 
           if [ "$STATUS" != "200" ]; then
             echo "QUERY FAILED"
-            echo "$BODY"
             exit 1
           fi
 
-          echo "SUCCESS!"
-          echo "$BODY" | jq .
-
           PLAYER_COUNT=$(echo "$BODY" | jq '.players | length')
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          echo "------------------------------"
-          echo "JBF- Pals and Poachers Day Shift"
+          echo "SUCCESS!"
+          echo "Time: $TIMESTAMP"
           echo "Players Online: $PLAYER_COUNT"
-          echo "------------------------------"
+
+          mkdir -p data
+
+          if [ ! -f data/palworld-day-shift.csv ]; then
+            echo "timestamp,players_online" > data/palworld-day-shift.csv
+          fi
+
+          echo "$TIMESTAMP,$PLAYER_COUNT" >> data/palworld-day-shift.csv
+
+      - name: Save reading to repository
+        run: |
+          git config user.name "JBF Server Stalker"
+          git config user.email "server-stalker@users.noreply.github.com"
+
+          git add data/palworld-day-shift.csv
+
+          if git diff --cached --quiet; then
+            echo "Nothing new to save."
+          else
+            git commit -m "Server Stalker: Palworld player count"
+            git push
+          fi
